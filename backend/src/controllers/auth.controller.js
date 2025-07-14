@@ -49,7 +49,11 @@ export const signup = async (req, res) => {
   }
 };
 export const login = (req, res) => {
-  res.send("login route");
+  const { email, password } = req.body;
+  try {
+  } catch {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };
 export const logout = (req, res) => {
   res.send("logout route");
