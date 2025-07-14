@@ -1,4 +1,5 @@
 # LiveTalk-A-Fullstack-Chat-App-Using-MERN-WebSockets
+
 **LiveTalk** is a fullstack real-time chat application built with the **MERN stack (MongoDB, Express, React, Node.js)** and **Socket.io** for WebSocket communication.
 
 ## 🚀 Features
@@ -21,6 +22,7 @@
 ## 📦 Installation
 
 ### 1. Clone the repo
+
 ```bash
 git clone [https://github.com/yourusername/livetalk.git](https://github.com/kimtechnos/LiveTalk-A-Fullstack-Chat-App-Using-MERN-WebSockets.git)
 cd livetalk
@@ -35,3 +37,4 @@ npm install
 npm run dev
 
 
+```
