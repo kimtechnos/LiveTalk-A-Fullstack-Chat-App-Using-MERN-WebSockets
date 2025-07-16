@@ -84,3 +84,41 @@ export const logout = (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { profilePic } = req.body;
+    const userId = req.user?._id;
+
+    // Check if the user is authenticated
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // Check if profile picture is provided
+    if (!profilePic) {
+      return res.status(400).json({ message: "Profile picture is required" });
+    }
+
+    // Upload image to Cloudinary
+    const uploadResponse = await cloudinary.uploader.upload(profilePic);
+
+    // Update user in the database
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { profilePic: uploadResponse.secure_url },
+      { new: true },
+    );
+
+    // Return sanitized response
+    res.status(200).json({
+      _id: updatedUser._id,
+      fullName: updatedUser.fullName,
+      email: updatedUser.email,
+      profilePic: updatedUser.profilePic,
+    });
+  } catch (error) {
+    console.error("Error in updateProfile controller:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
