@@ -8,6 +8,7 @@ import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore";
+import { useThemeStore } from "./store/useThemeStore.js";
 import { Loader } from "lucide-react";
 // import {useThemeStore} from "./store/useThemeStore";
 import { useEffect } from "react";
@@ -18,10 +19,15 @@ const App = () => {
   const authUser = useAuthStore((state) => state.authUser);
   const checkAuth = useAuthStore((state) => state.CheckAuth);
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
+  const { theme } = useThemeStore();
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
+  // Set the theme on initial load
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
   console.log("authUser", authUser);
   if (isCheckingAuth && !authUser)
