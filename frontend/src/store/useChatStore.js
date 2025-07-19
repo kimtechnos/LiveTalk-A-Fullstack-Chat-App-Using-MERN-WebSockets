@@ -7,6 +7,7 @@ export const useChatStore = create((set, get) => ({
   messages: [],
   users: [],
   recentMessages: {}, // { [userId]: lastMessage }
+  typingUsers: [], // array of userIds who are currently typing to the current user
   isMessagesLoading: false,
   isUsersLoading: false,
   selectedUser: null,
@@ -55,7 +56,7 @@ export const useChatStore = create((set, get) => ({
     try {
       const res = await axiosInstance.post(
         `/messages/send/${selectedUser._id}`,
-        messageData
+        messageData,
       );
 
       set({
@@ -75,6 +76,17 @@ export const useChatStore = create((set, get) => ({
       console.error(error.response?.data?.message);
       toast.error("Failed to send message");
     }
+  },
+
+  setTyping: (userId) => {
+    set((state) => ({
+      typingUsers: [...new Set([...state.typingUsers, userId])],
+    }));
+  },
+  setStopTyping: (userId) => {
+    set((state) => ({
+      typingUsers: state.typingUsers.filter((id) => id !== userId),
+    }));
   },
 
   subscribeToMessages: () => {
@@ -125,9 +137,17 @@ export const useChatStore = create((set, get) => ({
     socket.on("messageStatusUpdated", ({ messageId, status }) => {
       set({
         messages: get().messages.map((msg) =>
-          msg._id === messageId ? { ...msg, status } : msg
+          msg._id === messageId ? { ...msg, status } : msg,
         ),
       });
+    });
+
+    // Listen for typing events
+    socket.on("typing", ({ senderId }) => {
+      get().setTyping(senderId);
+    });
+    socket.on("stopTyping", ({ senderId }) => {
+      get().setStopTyping(senderId);
     });
 
     // Emit seen event when opening the chat
@@ -150,11 +170,17 @@ export const useChatStore = create((set, get) => ({
     const socket = useAuthStore.getState().socket;
     socket.off("newMessage");
     socket.off("messageStatusUpdated");
+    socket.off("typing");
+    socket.off("stopTyping");
   },
 
   //later
   setSelectedUser: (selectedUser) => {
-    set({ selectedUser });
+    // Clear all typing indicators when switching chats
+    set((state) => ({
+      selectedUser,
+      typingUsers: [],
+    }));
     // Emit seen for all unseen messages from this user
     const { messages } = get();
     const { authUser, socket } = useAuthStore.getState();
@@ -171,5 +197,8 @@ export const useChatStore = create((set, get) => ({
         });
       }
     });
+    // Optionally, emit stopTyping for previous chat
+    // (if you want to ensure the other user doesn't see you as typing)
+    // You can add logic here if needed
   },
 }));

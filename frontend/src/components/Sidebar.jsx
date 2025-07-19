@@ -13,6 +13,7 @@ const Sidebar = () => {
     setSelectedUser,
     isUsersLoading,
     recentMessages,
+    typingUsers,
   } = useChatStore();
 
   const { onlineUsers } = useAuthStore();
@@ -96,7 +97,11 @@ const Sidebar = () => {
               </div>
               {/* Show 'Online' text on lg and up, icon only on smaller screens */}
               <div className="text-xs text-zinc-400 flex items-center gap-1">
-                {onlineUsers.includes(user._id) ? (
+                {typingUsers.includes(user._id) ? (
+                  <span className="italic text-xs text-blue-500">
+                    typing...
+                  </span>
+                ) : onlineUsers.includes(user._id) ? (
                   <>
                     <span className="lg:inline hidden">Online</span>
                     <span className="inline lg:hidden w-2 h-2 rounded-full bg-green-500"></span>

@@ -65,6 +65,21 @@ io.on("connection", (socket) => {
       console.error("Error updating message to seen:", err);
     }
   });
+
+  // Typing indicator events
+  socket.on("typing", ({ receiverId, senderId }) => {
+    const receiverSocketId = userSocketMap[receiverId];
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("typing", { senderId });
+    }
+  });
+
+  socket.on("stopTyping", ({ receiverId, senderId }) => {
+    const receiverSocketId = userSocketMap[receiverId];
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("stopTyping", { senderId });
+    }
+  });
 });
 
 export { io, app, server };

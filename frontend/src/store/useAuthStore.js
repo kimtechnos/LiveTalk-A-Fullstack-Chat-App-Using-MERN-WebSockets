@@ -108,13 +108,13 @@ export const useAuthStore = create((set, get) => ({
       const { messages, set, recentMessages } = useChatStore.getState();
       set({
         messages: messages.map((msg) =>
-          msg._id === messageId ? { ...msg, status } : msg
+          msg._id === messageId ? { ...msg, status } : msg,
         ),
         recentMessages: Object.fromEntries(
           Object.entries(recentMessages).map(([userId, msg]) => [
             userId,
             msg._id === messageId ? { ...msg, status } : msg,
-          ])
+          ]),
         ),
       });
     });
