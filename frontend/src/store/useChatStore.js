@@ -49,18 +49,7 @@ export const useChatStore = create((set, get) => ({
       if (socket) {
         socket.emit("newMessage", res.data);
       }
-      // try {
-      //   const res = await axiosInstance.post(
-      //     `/messages/send/${selectedUser._id}`,
-      //     messageData,
-      //   );
-      //   set({ messages: [...messages, res.data] });
-
-      //   // Emit the new message to the socket server
-      //   const socket = useAuthStore.getState().socket;
-      //   if (socket) {
-      //     socket.emit("newMessage", res.data);
-      //   }
+    
     } catch (error) {
       console.error(error.response?.data?.message);
       toast.error("Failed to send message");
