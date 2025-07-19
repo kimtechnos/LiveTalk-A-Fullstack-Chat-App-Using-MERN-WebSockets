@@ -80,3 +80,17 @@ export const sendMessage = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const getUndeliveredMessages = async (req, res) => {
+  try {
+    const myId = req.user._id;
+    const messages = await Message.find({
+      receiverId: myId,
+      status: "sent",
+    });
+    res.status(200).json(messages);
+  } catch (error) {
+    console.log("Error in getUndeliveredMessages controller: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

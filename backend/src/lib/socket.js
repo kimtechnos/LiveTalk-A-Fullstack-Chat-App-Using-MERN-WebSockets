@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
 import http from "http";
 import express from "express";
+import Message from "../models/message.model.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -31,6 +32,38 @@ io.on("connection", (socket) => {
     delete userSocketMap[userId];
     // Emit the updated list of online users
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
+  });
+
+  // Listen for message delivery
+  socket.on("messageDelivered", async ({ messageId, senderId }) => {
+    try {
+      await Message.findByIdAndUpdate(messageId, { status: "delivered" });
+      const senderSocketId = userSocketMap[senderId];
+      if (senderSocketId) {
+        io.to(senderSocketId).emit("messageStatusUpdated", {
+          messageId,
+          status: "delivered",
+        });
+      }
+    } catch (err) {
+      console.error("Error updating message to delivered:", err);
+    }
+  });
+
+  // Listen for message seen
+  socket.on("messageSeen", async ({ messageId, senderId }) => {
+    try {
+      await Message.findByIdAndUpdate(messageId, { status: "seen" });
+      const senderSocketId = userSocketMap[senderId];
+      if (senderSocketId) {
+        io.to(senderSocketId).emit("messageStatusUpdated", {
+          messageId,
+          status: "seen",
+        });
+      }
+    } catch (err) {
+      console.error("Error updating message to seen:", err);
+    }
   });
 });
 

@@ -7,6 +7,7 @@ import MessageInput from "./MessageInput";
 import MessageSkeleton from "./skeletons/MessageSkeleton";
 import { useAuthStore } from "../store/useAuthStore";
 import { formatMessageTime } from "../lib/utils";
+import { Check, CheckCheck } from "lucide-react";
 
 const ChatContainer = () => {
   const {
@@ -79,7 +80,7 @@ const ChatContainer = () => {
                 {formatMessageTime(message.createdAt)}
               </time>
             </div>
-            <div className="chat-bubble flex flex-col">
+            <div className="chat-bubble flex flex-col relative">
               {message.image && (
                 <img
                   src={message.image}
@@ -88,6 +89,20 @@ const ChatContainer = () => {
                 />
               )}
               {message.text && <p>{message.text}</p>}
+              {/* Message status ticks for outgoing messages */}
+              {message.senderId === authUser._id && (
+                <span className="absolute bottom-1 right-2 flex items-center gap-0.5">
+                  {message.status === "sent" && (
+                    <Check size={16} className="text-gray-400" />
+                  )}
+                  {message.status === "delivered" && (
+                    <CheckCheck size={16} className="text-gray-400" />
+                  )}
+                  {message.status === "seen" && (
+                    <CheckCheck size={16} className="text-blue-500" />
+                  )}
+                </span>
+              )}
             </div>
           </div>
         ))}

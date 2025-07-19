@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import { toast } from "react-hot-toast";
 import { io } from "socket.io-client";
+import { useChatStore } from "./useChatStore";
 const BASE_URL =
   import.meta.env.MODE === "development" ? "http://localhost:5001" : "/";
 export const useAuthStore = create((set, get) => ({
@@ -102,8 +103,39 @@ export const useAuthStore = create((set, get) => ({
     socket.connect();
     set({ socket: socket });
 
-    socket.on("getOnlineUsers", (userIds) => {
+    // Global listener for message status updates
+    socket.on("messageStatusUpdated", ({ messageId, status }) => {
+      const { messages, set, recentMessages } = useChatStore.getState();
+      set({
+        messages: messages.map((msg) =>
+          msg._id === messageId ? { ...msg, status } : msg
+        ),
+        recentMessages: Object.fromEntries(
+          Object.entries(recentMessages).map(([userId, msg]) => [
+            userId,
+            msg._id === messageId ? { ...msg, status } : msg,
+          ])
+        ),
+      });
+    });
+
+    socket.on("getOnlineUsers", async (userIds) => {
       set({ onlineUsers: userIds });
+      // Emit delivery for all undelivered messages
+      const { authUser } = get();
+      if (!authUser) return;
+      try {
+        const res = await axiosInstance.get("/messages/undelivered/all");
+        const undelivered = res.data;
+        undelivered.forEach((msg) => {
+          socket.emit("messageDelivered", {
+            messageId: msg._id,
+            senderId: msg.senderId,
+          });
+        });
+      } catch (err) {
+        // Optionally handle error
+      }
     });
   },
   disconnectSocket: () => {

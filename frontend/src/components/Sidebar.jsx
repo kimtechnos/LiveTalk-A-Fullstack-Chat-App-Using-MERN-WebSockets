@@ -3,11 +3,17 @@ import { useEffect } from "react";
 import { useChatStore } from "../store/useChatStore";
 import SidebarSkeleton from "./skeletons/SidebarSkeleton";
 import { useAuthStore } from "../store/useAuthStore";
-import { Users } from "lucide-react";
+import { Users, Check, CheckCheck } from "lucide-react";
 
 const Sidebar = () => {
-  const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } =
-    useChatStore();
+  const {
+    getUsers,
+    users,
+    selectedUser,
+    setSelectedUser,
+    isUsersLoading,
+    recentMessages,
+  } = useChatStore();
 
   const { onlineUsers } = useAuthStore();
   useEffect(() => {
@@ -57,12 +63,37 @@ const Sidebar = () => {
             </div>
 
             {/* User info - only visible on larger screens */}
-            <div className="text-left min-w-0">
+            <div className="text-left min-w-0 flex flex-col">
               {/* Show full name on all screens */}
               <div className="font-medium truncate text-sm sm:text-base">
                 {user.fullName}
               </div>
-
+              {/* Last message and ticks */}
+              <div className="flex items-center gap-1 text-xs text-zinc-400 mt-0.5">
+                {recentMessages[user._id] && (
+                  <>
+                    <span className="truncate max-w-[100px]">
+                      {recentMessages[user._id].text ||
+                        (recentMessages[user._id].image ? "[Image]" : "")}
+                    </span>
+                    {/* Only show ticks if the last message was sent by the current user */}
+                    {recentMessages[user._id].senderId ===
+                      useAuthStore.getState().authUser?._id && (
+                      <span className="ml-1 flex items-center">
+                        {recentMessages[user._id].status === "sent" && (
+                          <Check size={14} className="text-gray-400" />
+                        )}
+                        {recentMessages[user._id].status === "delivered" && (
+                          <CheckCheck size={14} className="text-gray-400" />
+                        )}
+                        {recentMessages[user._id].status === "seen" && (
+                          <CheckCheck size={14} className="text-blue-500" />
+                        )}
+                      </span>
+                    )}
+                  </>
+                )}
+              </div>
               {/* Show 'Online' text on lg and up, icon only on smaller screens */}
               <div className="text-xs text-zinc-400 flex items-center gap-1">
                 {onlineUsers.includes(user._id) ? (

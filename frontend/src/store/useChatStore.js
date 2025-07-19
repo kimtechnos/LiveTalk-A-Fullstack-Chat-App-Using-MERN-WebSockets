@@ -6,6 +6,7 @@ import { useAuthStore } from "./useAuthStore";
 export const useChatStore = create((set, get) => ({
   messages: [],
   users: [],
+  recentMessages: {}, // { [userId]: lastMessage }
   isMessagesLoading: false,
   isUsersLoading: false,
   selectedUser: null,
@@ -27,6 +28,21 @@ export const useChatStore = create((set, get) => ({
     try {
       const res = await axiosInstance.get(`/messages/${userId}`);
       set({ messages: res.data });
+      // Emit seen for all unseen messages from this user
+      const { authUser, socket } = useAuthStore.getState();
+      if (!authUser || !socket) return;
+      res.data.forEach((msg) => {
+        if (
+          msg.receiverId === authUser._id &&
+          msg.senderId === userId &&
+          msg.status !== "seen"
+        ) {
+          socket.emit("messageSeen", {
+            messageId: msg._id,
+            senderId: msg.senderId,
+          });
+        }
+      });
     } catch (error) {
       console.error(error.response?.data?.message);
       toast.error("Failed to load messages");
@@ -35,21 +51,26 @@ export const useChatStore = create((set, get) => ({
     }
   },
   sendMessage: async (messageData) => {
-    const { selectedUser, messages } = get();
+    const { selectedUser, messages, recentMessages } = get();
     try {
       const res = await axiosInstance.post(
         `/messages/send/${selectedUser._id}`,
-        messageData,
+        messageData
       );
 
-      set({ messages: [...messages, res.data] });
+      set({
+        messages: [...messages, res.data],
+        recentMessages: {
+          ...recentMessages,
+          [selectedUser._id]: res.data,
+        },
+      });
 
       // Emit the new message to the socket server
       const socket = useAuthStore.getState().socket;
       if (socket) {
         socket.emit("newMessage", res.data);
       }
-    
     } catch (error) {
       console.error(error.response?.data?.message);
       toast.error("Failed to send message");
@@ -57,26 +78,98 @@ export const useChatStore = create((set, get) => ({
   },
 
   subscribeToMessages: () => {
-    const { selectedUser } = get();
+    const { selectedUser, recentMessages } = get();
     if (!selectedUser) return;
 
     const socket = useAuthStore.getState().socket;
 
     socket.on("newMessage", (newMessage) => {
-      const isMessageSentFromSelectedUser =
-        newMessage.senderId === selectedUser._id;
-      if (!isMessageSentFromSelectedUser) return;
+      // Always emit delivery event if the message is for the current user
+      const { authUser } = useAuthStore.getState();
+      if (authUser && newMessage.receiverId === authUser._id) {
+        socket.emit("messageDelivered", {
+          messageId: newMessage._id,
+          senderId: newMessage.senderId,
+        });
+      }
 
+      // Only add the message to the chat if it is from the selected user
+      const { selectedUser } = get();
+      const isMessageSentFromSelectedUser =
+        selectedUser && newMessage.senderId === selectedUser._id;
+      if (isMessageSentFromSelectedUser) {
+        set({
+          messages: [...get().messages, newMessage],
+        });
+        // Emit seen event if the chat is open (recipient is viewing the chat)
+        socket.emit("messageSeen", {
+          messageId: newMessage._id,
+          senderId: newMessage.senderId,
+        });
+      }
+      // Update recentMessages for both sender and receiver
+      const { recentMessages } = get();
+      const chatUserId =
+        authUser && newMessage.senderId === authUser._id
+          ? newMessage.receiverId
+          : newMessage.senderId;
       set({
-        messages: [...get().messages, newMessage],
+        recentMessages: {
+          ...recentMessages,
+          [chatUserId]: newMessage,
+        },
       });
+    });
+
+    // Listen for message status updates
+    socket.on("messageStatusUpdated", ({ messageId, status }) => {
+      set({
+        messages: get().messages.map((msg) =>
+          msg._id === messageId ? { ...msg, status } : msg
+        ),
+      });
+    });
+
+    // Emit seen event when opening the chat
+    const { messages } = get();
+    const { authUser } = useAuthStore.getState();
+    messages.forEach((msg) => {
+      if (
+        msg.receiverId === authUser?._id &&
+        msg.senderId === selectedUser._id &&
+        msg.status !== "seen"
+      ) {
+        socket.emit("messageSeen", {
+          messageId: msg._id,
+          senderId: msg.senderId,
+        });
+      }
     });
   },
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
     socket.off("newMessage");
+    socket.off("messageStatusUpdated");
   },
 
   //later
-  setSelectedUser: (selectedUser) => set({ selectedUser }),
+  setSelectedUser: (selectedUser) => {
+    set({ selectedUser });
+    // Emit seen for all unseen messages from this user
+    const { messages } = get();
+    const { authUser, socket } = useAuthStore.getState();
+    if (!authUser || !socket) return;
+    messages.forEach((msg) => {
+      if (
+        msg.receiverId === authUser._id &&
+        msg.senderId === selectedUser._id &&
+        msg.status !== "seen"
+      ) {
+        socket.emit("messageSeen", {
+          messageId: msg._id,
+          senderId: msg.senderId,
+        });
+      }
+    });
+  },
 }));
