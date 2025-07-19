@@ -94,6 +94,8 @@ const MessageInput = () => {
         <div className="flex-1 flex gap-2">
           <input
             type="text"
+            id="messageText"
+            name="messageText"
             className="w-full input input-bordered rounded-lg input-sm sm:input-md"
             placeholder="Type a message..."
             value={text}
@@ -111,6 +113,8 @@ const MessageInput = () => {
           />
           <input
             type="file"
+            id="messageImage"
+            name="messageImage"
             accept="image/*"
             className="hidden"
             ref={fileInputRef}

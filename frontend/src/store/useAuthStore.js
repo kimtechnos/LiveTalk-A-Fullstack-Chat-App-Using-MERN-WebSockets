@@ -105,18 +105,44 @@ export const useAuthStore = create((set, get) => ({
 
     // Global listener for message status updates
     socket.on("messageStatusUpdated", ({ messageId, status }) => {
-      const { messages, set, recentMessages } = useChatStore.getState();
-      set({
-        messages: messages.map((msg) =>
-          msg._id === messageId ? { ...msg, status } : msg,
-        ),
-        recentMessages: Object.fromEntries(
-          Object.entries(recentMessages).map(([userId, msg]) => [
-            userId,
-            msg._id === messageId ? { ...msg, status } : msg,
-          ]),
-        ),
+      console.log("Global messageStatusUpdated received:", {
+        messageId,
+        status,
       });
+      const { messages, set, recentMessages } = useChatStore.getState();
+      console.log("Current messages count:", messages.length);
+      console.log("Current recentMessages keys:", Object.keys(recentMessages));
+
+      const updatedMessages = messages.map((msg) =>
+        msg._id === messageId ? { ...msg, status } : msg,
+      );
+      const updatedRecentMessages = Object.fromEntries(
+        Object.entries(recentMessages).map(([userId, msg]) => [
+          userId,
+          msg._id === messageId ? { ...msg, status } : msg,
+        ]),
+      );
+
+      console.log("Updated messages count:", updatedMessages.length);
+      console.log(
+        "Updated recentMessages keys:",
+        Object.keys(updatedRecentMessages),
+      );
+
+      set({
+        messages: updatedMessages,
+        recentMessages: updatedRecentMessages,
+      });
+    });
+
+    // Global listener for typing events
+    socket.on("typing", ({ senderId }) => {
+      const { setTyping } = useChatStore.getState();
+      setTyping(senderId);
+    });
+    socket.on("stopTyping", ({ senderId }) => {
+      const { setStopTyping } = useChatStore.getState();
+      setStopTyping(senderId);
     });
 
     socket.on("getOnlineUsers", async (userIds) => {
@@ -125,16 +151,24 @@ export const useAuthStore = create((set, get) => ({
       const { authUser } = get();
       if (!authUser) return;
       try {
+        console.log("User came online, fetching undelivered messages...");
         const res = await axiosInstance.get("/messages/undelivered/all");
         const undelivered = res.data;
+        console.log("Found", undelivered.length, "undelivered messages");
         undelivered.forEach((msg) => {
+          console.log(
+            "Emitting messageDelivered for message:",
+            msg._id,
+            "from sender:",
+            msg.senderId,
+          );
           socket.emit("messageDelivered", {
             messageId: msg._id,
             senderId: msg.senderId,
           });
         });
       } catch (err) {
-        // Optionally handle error
+        console.error("Error fetching undelivered messages:", err);
       }
     });
   },

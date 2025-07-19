@@ -23,6 +23,29 @@ io.on("connection", (socket) => {
   const userId = socket.handshake.query.userId;
   if (userId) userSocketMap[userId] = socket.id; // Store the socketId for the userId
   console.log(`User ${userId} connected with socket ID: ${socket.id}`);
+
+  // Emit delivery status for all messages sent to this user that are still in 'sent' status
+  if (userId) {
+    Message.find({ receiverId: userId, status: "sent" })
+      .then((messages) => {
+        console.log(
+          `Found ${messages.length} undelivered messages for user ${userId}`,
+        );
+        messages.forEach((message) => {
+          const senderSocketId = userSocketMap[message.senderId];
+          if (senderSocketId) {
+            io.to(senderSocketId).emit("messageStatusUpdated", {
+              messageId: message._id,
+              status: "delivered",
+            });
+          }
+        });
+      })
+      .catch((err) => {
+        console.error("Error finding undelivered messages:", err);
+      });
+  }
+
   //io.emit() is used to emit events to all connected clients
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
   // Listen for disconnect event

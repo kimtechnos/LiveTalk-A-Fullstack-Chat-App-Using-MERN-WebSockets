@@ -84,10 +84,21 @@ export const sendMessage = async (req, res) => {
 export const getUndeliveredMessages = async (req, res) => {
   try {
     const myId = req.user._id;
+    console.log("getUndeliveredMessages called for user:", myId);
     const messages = await Message.find({
       receiverId: myId,
       status: "sent",
     });
+    console.log(
+      "Found",
+      messages.length,
+      "undelivered messages for user:",
+      myId,
+    );
+    console.log(
+      "Undelivered messages:",
+      messages.map((m) => ({ id: m._id, senderId: m.senderId, text: m.text })),
+    );
     res.status(200).json(messages);
   } catch (error) {
     console.log("Error in getUndeliveredMessages controller: ", error.message);

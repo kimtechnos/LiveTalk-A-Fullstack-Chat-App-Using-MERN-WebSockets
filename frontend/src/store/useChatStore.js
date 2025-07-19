@@ -96,9 +96,10 @@ export const useChatStore = create((set, get) => ({
     const socket = useAuthStore.getState().socket;
 
     socket.on("newMessage", (newMessage) => {
-      // Always emit delivery event if the message is for the current user
+      // Emit delivery event if the message is for the current user (they are online)
       const { authUser } = useAuthStore.getState();
       if (authUser && newMessage.receiverId === authUser._id) {
+        // Mark as delivered immediately since the user is online
         socket.emit("messageDelivered", {
           messageId: newMessage._id,
           senderId: newMessage.senderId,
@@ -142,14 +143,6 @@ export const useChatStore = create((set, get) => ({
       });
     });
 
-    // Listen for typing events
-    socket.on("typing", ({ senderId }) => {
-      get().setTyping(senderId);
-    });
-    socket.on("stopTyping", ({ senderId }) => {
-      get().setStopTyping(senderId);
-    });
-
     // Emit seen event when opening the chat
     const { messages } = get();
     const { authUser } = useAuthStore.getState();
@@ -170,8 +163,6 @@ export const useChatStore = create((set, get) => ({
     const socket = useAuthStore.getState().socket;
     socket.off("newMessage");
     socket.off("messageStatusUpdated");
-    socket.off("typing");
-    socket.off("stopTyping");
   },
 
   //later

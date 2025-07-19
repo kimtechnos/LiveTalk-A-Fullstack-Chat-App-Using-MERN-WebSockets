@@ -45,6 +45,8 @@ const LoginPage = () => {
                 </div>
                 <input
                   type="email"
+                  id="email"
+                  name="email"
                   className={`input input-bordered w-full pl-10`}
                   placeholder="you@example.com"
                   value={formData.email}
@@ -64,6 +66,8 @@ const LoginPage = () => {
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
+                  id="password"
+                  name="password"
                   className={`input input-bordered w-full pl-10`}
                   placeholder="••••••••"
                   value={formData.password}
