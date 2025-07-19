@@ -42,6 +42,17 @@ export const sendMessage = async (req, res) => {
     const { text, image } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
+    if (!senderId || !receiverId) {
+      return res
+        .status(400)
+        .json({ error: "Sender or receiver ID is missing" });
+    }
+
+    if (!text && !image) {
+      return res
+        .status(400)
+        .json({ error: "Message must contain text or image" });
+    }
 
     let imageUrl;
     if (image) {
@@ -63,7 +74,6 @@ export const sendMessage = async (req, res) => {
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newMessage", newMessage);
     }
-
     res.status(201).json(newMessage);
   } catch (error) {
     console.log("Error in sendMessage controller: ", error.message);

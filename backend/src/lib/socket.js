@@ -13,7 +13,7 @@ const io = new Server(server, {
   },
 });
 export function getReceiverSocketId(userId) {
-  return userSocketId(userId);
+  return userSocketMap[userId];
 }
 const userSocketMap = {}; // Map to store userId and their corresponding socketId
 // Handle socket connection
