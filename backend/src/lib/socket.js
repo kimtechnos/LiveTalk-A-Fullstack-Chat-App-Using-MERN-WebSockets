@@ -2,7 +2,7 @@ import { Server } from "socket.io";
 import Message from "../models/message.model.js";
 
 let io;
-const userSocketMap = {};
+const userSocketMap = {}; // { userId: [socketId, ...] }
 
 export function setupSocket(server) {
   io = new Server(server, {
@@ -13,10 +13,21 @@ export function setupSocket(server) {
     },
   });
 
+  // Helper to emit to all sockets of a user
+  function emitToUser(userId, event, data) {
+    (userSocketMap[userId] || []).forEach((socketId) => {
+      io.to(socketId).emit(event, data);
+    });
+  }
+  io.emitToUser = emitToUser;
+
   io.on("connection", (socket) => {
     console.log("New client connected: ", socket.id);
     const userId = socket.handshake.query.userId;
-    if (userId) userSocketMap[userId] = socket.id;
+    if (userId) {
+      if (!userSocketMap[userId]) userSocketMap[userId] = [];
+      userSocketMap[userId].push(socket.id);
+    }
     console.log(`User ${userId} connected with socket ID: ${socket.id}`);
 
     // Emit delivery status for all messages sent to this user that are still in 'sent' status
@@ -27,13 +38,10 @@ export function setupSocket(server) {
             `Found ${messages.length} undelivered messages for user ${userId}`
           );
           messages.forEach((message) => {
-            const senderSocketId = userSocketMap[message.senderId];
-            if (senderSocketId) {
-              io.to(senderSocketId).emit("messageStatusUpdated", {
-                messageId: message._id,
-                status: "delivered",
-              });
-            }
+            emitToUser(message.senderId, "messageStatusUpdated", {
+              messageId: message._id,
+              status: "delivered",
+            });
           });
         })
         .catch((err) => {
@@ -44,20 +52,22 @@ export function setupSocket(server) {
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
     socket.on("disconnect", () => {
       console.log("Client disconnected: ", socket.id);
-      delete userSocketMap[userId];
+      if (userId && userSocketMap[userId]) {
+        userSocketMap[userId] = userSocketMap[userId].filter(
+          (id) => id !== socket.id
+        );
+        if (userSocketMap[userId].length === 0) delete userSocketMap[userId];
+      }
       io.emit("getOnlineUsers", Object.keys(userSocketMap));
     });
 
     socket.on("messageDelivered", async ({ messageId, senderId }) => {
       try {
         await Message.findByIdAndUpdate(messageId, { status: "delivered" });
-        const senderSocketId = userSocketMap[senderId];
-        if (senderSocketId) {
-          io.to(senderSocketId).emit("messageStatusUpdated", {
-            messageId,
-            status: "delivered",
-          });
-        }
+        emitToUser(senderId, "messageStatusUpdated", {
+          messageId,
+          status: "delivered",
+        });
       } catch (err) {
         console.error("Error updating message to delivered:", err);
       }
@@ -66,30 +76,21 @@ export function setupSocket(server) {
     socket.on("messageSeen", async ({ messageId, senderId }) => {
       try {
         await Message.findByIdAndUpdate(messageId, { status: "seen" });
-        const senderSocketId = userSocketMap[senderId];
-        if (senderSocketId) {
-          io.to(senderSocketId).emit("messageStatusUpdated", {
-            messageId,
-            status: "seen",
-          });
-        }
+        emitToUser(senderId, "messageStatusUpdated", {
+          messageId,
+          status: "seen",
+        });
       } catch (err) {
         console.error("Error updating message to seen:", err);
       }
     });
 
     socket.on("typing", ({ receiverId, senderId }) => {
-      const receiverSocketId = userSocketMap[receiverId];
-      if (receiverSocketId) {
-        io.to(receiverSocketId).emit("typing", { senderId });
-      }
+      emitToUser(receiverId, "typing", { senderId });
     });
 
     socket.on("stopTyping", ({ receiverId, senderId }) => {
-      const receiverSocketId = userSocketMap[receiverId];
-      if (receiverSocketId) {
-        io.to(receiverSocketId).emit("stopTyping", { senderId });
-      }
+      emitToUser(receiverId, "stopTyping", { senderId });
     });
   });
 }
