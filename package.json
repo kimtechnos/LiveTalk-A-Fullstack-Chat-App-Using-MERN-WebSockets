@@ -1,0 +1,14 @@
+{
+  "name": "LiveTalk-A-Fullstack-Chat-App-Using-MERN-WebSockets",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "pnpm --filter ./backend... install && pnpm --filter ./frontend... install && pnpm --filter ./frontend... build",
+    "start": "pnpm --filter ./backend... start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.12.1"
+}

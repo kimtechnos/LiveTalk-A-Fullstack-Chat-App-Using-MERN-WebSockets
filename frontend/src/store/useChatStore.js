@@ -136,9 +136,13 @@ export const useChatStore = create((set, get) => ({
 
     // Listen for message status updates
     socket.on("messageStatusUpdated", ({ messageId, status }) => {
+      // Only upgrade status, never downgrade
+      const statusOrder = { sent: 1, delivered: 2, seen: 3 };
       set({
         messages: get().messages.map((msg) =>
-          msg._id === messageId ? { ...msg, status } : msg,
+          msg._id === messageId && statusOrder[status] > statusOrder[msg.status]
+            ? { ...msg, status }
+            : msg,
         ),
       });
     });

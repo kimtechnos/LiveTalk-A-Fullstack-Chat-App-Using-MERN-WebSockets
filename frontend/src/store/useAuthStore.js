@@ -105,30 +105,22 @@ export const useAuthStore = create((set, get) => ({
 
     // Global listener for message status updates
     socket.on("messageStatusUpdated", ({ messageId, status }) => {
-      console.log("Global messageStatusUpdated received:", {
-        messageId,
-        status,
-      });
+      // Only upgrade status, never downgrade
+      const statusOrder = { sent: 1, delivered: 2, seen: 3 };
       const { messages, set, recentMessages } = useChatStore.getState();
-      console.log("Current messages count:", messages.length);
-      console.log("Current recentMessages keys:", Object.keys(recentMessages));
-
       const updatedMessages = messages.map((msg) =>
-        msg._id === messageId ? { ...msg, status } : msg,
+        msg._id === messageId && statusOrder[status] > statusOrder[msg.status]
+          ? { ...msg, status }
+          : msg,
       );
       const updatedRecentMessages = Object.fromEntries(
         Object.entries(recentMessages).map(([userId, msg]) => [
           userId,
-          msg._id === messageId ? { ...msg, status } : msg,
+          msg._id === messageId && statusOrder[status] > statusOrder[msg.status]
+            ? { ...msg, status }
+            : msg,
         ]),
       );
-
-      console.log("Updated messages count:", updatedMessages.length);
-      console.log(
-        "Updated recentMessages keys:",
-        Object.keys(updatedRecentMessages),
-      );
-
       set({
         messages: updatedMessages,
         recentMessages: updatedRecentMessages,
