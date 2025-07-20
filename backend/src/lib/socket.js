@@ -16,7 +16,7 @@ export function setupSocket(server) {
   io.on("connection", (socket) => {
     console.log("New client connected: ", socket.id);
     const userId = socket.handshake.query.userId;
-    if (userId) userSocketMap[userId] = socket.id; // Store the socketId for the userId
+    if (userId) userSocketMap[userId] = socket.id;
     console.log(`User ${userId} connected with socket ID: ${socket.id}`);
 
     // Emit delivery status for all messages sent to this user that are still in 'sent' status
@@ -41,18 +41,13 @@ export function setupSocket(server) {
         });
     }
 
-    //io.emit() is used to emit events to all connected clients
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
-    // Listen for disconnect event
     socket.on("disconnect", () => {
       console.log("Client disconnected: ", socket.id);
-      // Remove the userId from the map when the socket disconnects
       delete userSocketMap[userId];
-      // Emit the updated list of online users
       io.emit("getOnlineUsers", Object.keys(userSocketMap));
     });
 
-    // Listen for message delivery
     socket.on("messageDelivered", async ({ messageId, senderId }) => {
       try {
         await Message.findByIdAndUpdate(messageId, { status: "delivered" });
@@ -68,7 +63,6 @@ export function setupSocket(server) {
       }
     });
 
-    // Listen for message seen
     socket.on("messageSeen", async ({ messageId, senderId }) => {
       try {
         await Message.findByIdAndUpdate(messageId, { status: "seen" });
@@ -84,7 +78,6 @@ export function setupSocket(server) {
       }
     });
 
-    // Typing indicator events
     socket.on("typing", ({ receiverId, senderId }) => {
       const receiverSocketId = userSocketMap[receiverId];
       if (receiverSocketId) {
