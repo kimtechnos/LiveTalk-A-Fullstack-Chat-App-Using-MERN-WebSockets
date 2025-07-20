@@ -2,7 +2,7 @@ import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
 
 import cloudinary from "../lib/cloudinary.js";
-import { getReceiverSocketId, io } from "../lib/socket.js";
+import { io } from "../lib/socket.js";
 
 export const getUsersForSidebar = async (req, res) => {
   try {
@@ -70,9 +70,12 @@ export const sendMessage = async (req, res) => {
 
     await newMessage.save();
     // Emit the new message to the receiver's socket
-    const receiverSocketId = getReceiverSocketId(receiverId);
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit("newMessage", newMessage);
+    // Find the socketId for the receiverId
+    const receiverSocket = Array.from(io.sockets.sockets.values()).find(
+      (socket) => socket.handshake.query.userId === receiverId.toString()
+    );
+    if (receiverSocket) {
+      io.to(receiverSocket.id).emit("newMessage", newMessage);
     }
     res.status(201).json(newMessage);
   } catch (error) {
@@ -93,11 +96,11 @@ export const getUndeliveredMessages = async (req, res) => {
       "Found",
       messages.length,
       "undelivered messages for user:",
-      myId,
+      myId
     );
     console.log(
       "Undelivered messages:",
-      messages.map((m) => ({ id: m._id, senderId: m.senderId, text: m.text })),
+      messages.map((m) => ({ id: m._id, senderId: m.senderId, text: m.text }))
     );
     res.status(200).json(messages);
   } catch (error) {
