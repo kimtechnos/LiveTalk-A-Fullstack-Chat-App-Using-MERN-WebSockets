@@ -69,13 +69,10 @@ export const sendMessage = async (req, res) => {
     });
 
     await newMessage.save();
-    // Emit the new message to the receiver's socket
-    // Find the socketId for the receiverId
-    const receiverSocket = Array.from(io.sockets.sockets.values()).find(
-      (socket) => socket.handshake.query.userId === receiverId.toString()
-    );
-    if (receiverSocket) {
-      io.to(receiverSocket.id).emit("newMessage", newMessage);
+    // Emit the new message to all sockets of the receiver and the sender
+    if (io.emitToUser) {
+      io.emitToUser(receiverId.toString(), "newMessage", newMessage);
+      io.emitToUser(senderId.toString(), "newMessage", newMessage);
     }
     res.status(201).json(newMessage);
   } catch (error) {

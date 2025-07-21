@@ -111,7 +111,7 @@ export const useAuthStore = create((set, get) => ({
       const updatedMessages = messages.map((msg) =>
         msg._id === messageId && statusOrder[status] > statusOrder[msg.status]
           ? { ...msg, status }
-          : msg,
+          : msg
       );
       const updatedRecentMessages = Object.fromEntries(
         Object.entries(recentMessages).map(([userId, msg]) => [
@@ -119,7 +119,7 @@ export const useAuthStore = create((set, get) => ({
           msg._id === messageId && statusOrder[status] > statusOrder[msg.status]
             ? { ...msg, status }
             : msg,
-        ]),
+        ])
       );
       set({
         messages: updatedMessages,
@@ -152,7 +152,7 @@ export const useAuthStore = create((set, get) => ({
             "Emitting messageDelivered for message:",
             msg._id,
             "from sender:",
-            msg.senderId,
+            msg.senderId
           );
           socket.emit("messageDelivered", {
             messageId: msg._id,

@@ -56,7 +56,7 @@ export const useChatStore = create((set, get) => ({
     try {
       const res = await axiosInstance.post(
         `/messages/send/${selectedUser._id}`,
-        messageData,
+        messageData
       );
 
       set({
@@ -96,29 +96,25 @@ export const useChatStore = create((set, get) => ({
     const socket = useAuthStore.getState().socket;
 
     socket.on("newMessage", (newMessage) => {
-      // Emit delivery event if the message is for the current user (they are online)
       const { authUser } = useAuthStore.getState();
-      if (authUser && newMessage.receiverId === authUser._id) {
-        // Mark as delivered immediately since the user is online
-        socket.emit("messageDelivered", {
-          messageId: newMessage._id,
-          senderId: newMessage.senderId,
-        });
-      }
-
-      // Only add the message to the chat if it is from the selected user
       const { selectedUser } = get();
-      const isMessageSentFromSelectedUser =
-        selectedUser && newMessage.senderId === selectedUser._id;
-      if (isMessageSentFromSelectedUser) {
+      const isMessageForCurrentChat =
+        selectedUser &&
+        ((newMessage.senderId === selectedUser._id &&
+          newMessage.receiverId === authUser._id) ||
+          (newMessage.senderId === authUser._id &&
+            newMessage.receiverId === selectedUser._id));
+      if (isMessageForCurrentChat) {
         set({
           messages: [...get().messages, newMessage],
         });
-        // Emit seen event if the chat is open (recipient is viewing the chat)
-        socket.emit("messageSeen", {
-          messageId: newMessage._id,
-          senderId: newMessage.senderId,
-        });
+        // Emit seen event if the chat is open and the message is for the current user
+        if (newMessage.receiverId === authUser._id) {
+          socket.emit("messageSeen", {
+            messageId: newMessage._id,
+            senderId: newMessage.senderId,
+          });
+        }
       }
       // Update recentMessages for both sender and receiver
       const { recentMessages } = get();
@@ -142,7 +138,7 @@ export const useChatStore = create((set, get) => ({
         messages: get().messages.map((msg) =>
           msg._id === messageId && statusOrder[status] > statusOrder[msg.status]
             ? { ...msg, status }
-            : msg,
+            : msg
         ),
       });
     });
