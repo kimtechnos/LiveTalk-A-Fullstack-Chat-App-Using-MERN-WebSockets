@@ -12,7 +12,7 @@ import path from "path";
 // Initialize environment variables
 dotenv.config();
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5001;
 const __dirname = path.resolve();
 const app = express();
 const server = http.createServer(app);
@@ -25,6 +25,10 @@ app.use(
     credentials: true,
   })
 );
+
+app.use("/", (req, res) => {
+  res.send("OK");
+});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
