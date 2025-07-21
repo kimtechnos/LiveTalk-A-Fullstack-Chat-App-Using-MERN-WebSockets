@@ -26,7 +26,7 @@ app.use(
   })
 );
 
-app.use("/", (req, res) => {
+app.get("/", (req, res) => {
   res.send("OK");
 });
 
