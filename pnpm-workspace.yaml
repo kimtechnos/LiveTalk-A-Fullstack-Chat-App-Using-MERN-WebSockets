@@ -1,3 +1,9 @@
 packages:
-  - 'backend'
-  - 'frontend' 
+  - backend
+  - frontend
+
+onlyBuiltDependencies:
+  - '@swc/core'
+  - '@tailwindcss/oxide'
+  - bcrypt
+  - esbuild
