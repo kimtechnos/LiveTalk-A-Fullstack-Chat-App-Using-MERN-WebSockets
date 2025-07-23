@@ -22,8 +22,18 @@ export const useAuthStore = create((set, get) => ({
       set({ authUser: res.data, isCheckingAuth: false });
       get().connectSocket();
     } catch (error) {
-      console.error("Error checking authentication:", error);
-      set({ authUser: null, isCheckingAuth: false });
+      if (error.response && error.response.status === 401) {
+        set({ authUser: null, isCheckingAuth: false });
+        // Optionally disconnect socket if exists
+        if (get().socket) {
+          get().socket.off();
+          get().socket.disconnect();
+          set({ socket: null });
+        }
+      } else {
+        console.error("Error checking authentication:", error);
+        set({ authUser: null, isCheckingAuth: false });
+      }
     }
   },
   signup: async (data) => {
@@ -172,7 +182,16 @@ export const useAuthStore = create((set, get) => ({
           });
         });
       } catch (err) {
-        console.error("Error fetching undelivered messages:", err);
+        if (err.response && err.response.status === 401) {
+          set({ authUser: null });
+          if (get().socket) {
+            get().socket.off();
+            get().socket.disconnect();
+            set({ socket: null });
+          }
+        } else {
+          console.error("Error fetching undelivered messages:", err);
+        }
       }
     });
   },

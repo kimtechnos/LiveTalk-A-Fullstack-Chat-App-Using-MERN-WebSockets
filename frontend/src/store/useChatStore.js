@@ -13,6 +13,8 @@ export const useChatStore = create((set, get) => ({
   selectedUser: null,
 
   getUsers: async () => {
+    const { authUser } = useAuthStore.getState();
+    if (!authUser) return; // Prevent API call if not authenticated
     set({ isUsersLoading: true });
     try {
       const res = await axiosInstance.get("/messages/users");
