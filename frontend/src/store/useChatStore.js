@@ -175,7 +175,7 @@ export const useChatStore = create((set, get) => ({
     // Emit seen for all unseen messages from this user
     const { messages } = get();
     const { authUser, socket } = useAuthStore.getState();
-    if (!authUser || !socket) return;
+    if (!authUser || !socket) return; // Prevent null errors
     messages.forEach((msg) => {
       if (
         msg.receiverId === authUser._id &&
