@@ -4,7 +4,7 @@ import { toast } from "react-hot-toast";
 import { io } from "socket.io-client";
 import { useChatStore } from "./useChatStore";
 const BASE_URL =
-  import.meta.env.MODE === "development"
+  import.meta.env.VITE_API_BASE_URL === "development"
     ? "http://localhost:5001"
     : import.meta.env.VITE_API_BASE_URL;
 export const useAuthStore = create((set, get) => ({
@@ -68,10 +68,14 @@ export const useAuthStore = create((set, get) => ({
       console.log("Logout response:", res.data);
 
       if (data?.success) {
+        // Disconnect socket and remove all listeners if it exists
+        if (get().socket) {
+          get().socket.off(); // Remove all listeners
+          get().socket.disconnect();
+          set({ socket: null });
+        }
         set({ authUser: null });
         toast.success("Logged out successfully!");
-        // Disconnect socket if it exists
-        get().disconnectSocket();
       } else {
         toast.error("Logout failed.");
       }
@@ -108,9 +112,14 @@ export const useAuthStore = create((set, get) => ({
 
     // Global listener for message status updates
     socket.on("messageStatusUpdated", ({ messageId, status }) => {
-      // Only upgrade status, never downgrade
       const statusOrder = { sent: 1, delivered: 2, seen: 3 };
-      const { messages, set, recentMessages } = useChatStore.getState();
+
+      // ✅ CORRECTED: only get the state values from `getState()`
+      const { messages, recentMessages } = useChatStore.getState();
+
+      // ✅ NEW: use Zustand's `setState` method to update store
+      const setChatStore = useChatStore.setState;
+
       const updatedMessages = messages.map((msg) =>
         msg._id === messageId && statusOrder[status] > statusOrder[msg.status]
           ? { ...msg, status }
@@ -124,12 +133,12 @@ export const useAuthStore = create((set, get) => ({
             : msg,
         ])
       );
-      set({
+      // ✅ FIXED: use `setChatStore()` instead of invalid `set`
+      setChatStore({
         messages: updatedMessages,
         recentMessages: updatedRecentMessages,
       });
     });
-
     // Global listener for typing events
     socket.on("typing", ({ senderId }) => {
       const { setTyping } = useChatStore.getState();
@@ -168,6 +177,11 @@ export const useAuthStore = create((set, get) => ({
     });
   },
   disconnectSocket: () => {
-    if (get().socket?.connected) get().socket.disconnect();
+    const socket = get().socket;
+    if (socket && socket.connected) {
+      socket.off(); // Remove all listeners
+      socket.disconnect();
+      set({ socket: null });
+    }
   },
 }));

@@ -25,6 +25,8 @@ export const useChatStore = create((set, get) => ({
     }
   },
   getMessages: async (userId) => {
+    const { authUser } = useAuthStore.getState();
+    if (!authUser) return; // Prevent API call if not authenticated
     set({ isMessagesLoading: true });
     try {
       const res = await axiosInstance.get(`/messages/${userId}`);
@@ -90,10 +92,14 @@ export const useChatStore = create((set, get) => ({
   },
 
   subscribeToMessages: () => {
-    const { selectedUser, recentMessages } = get();
+    const { selectedUser } = get();
     if (!selectedUser) return;
 
     const socket = useAuthStore.getState().socket;
+    if (!socket) return;
+    // Remove previous listeners to prevent duplicates
+    socket.off("newMessage");
+    socket.off("messageStatusUpdated");
 
     socket.on("newMessage", (newMessage) => {
       const { authUser } = useAuthStore.getState();
