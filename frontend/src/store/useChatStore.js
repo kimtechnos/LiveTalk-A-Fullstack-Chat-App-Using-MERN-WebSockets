@@ -19,21 +19,45 @@ export const useChatStore = create((set, get) => ({
       return; // Prevent API call if not authenticated
     }
     console.log("Getting users for auth user:", authUser._id);
+
+    // Add a small delay to ensure cookie is set
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     set({ isUsersLoading: true });
-    try {
-      const res = await axiosInstance.get("/messages/users");
-      console.log("Users loaded successfully:", res.data.length, "users");
-      set({ users: res.data, isUsersLoading: false });
-    } catch (error) {
-      console.error(
-        "Failed to load users:",
-        error.response?.status,
-        error.response?.data
-      );
-      toast.error("Failed to load users");
-    } finally {
-      set({ isUsersLoading: false });
+
+    // Retry mechanism for auth issues
+    let retries = 0;
+    const maxRetries = 3;
+
+    while (retries < maxRetries) {
+      try {
+        const res = await axiosInstance.get("/messages/users");
+        console.log("Users loaded successfully:", res.data.length, "users");
+        set({ users: res.data, isUsersLoading: false });
+        return; // Success, exit the retry loop
+      } catch (error) {
+        console.error(
+          `Failed to load users (attempt ${retries + 1}/${maxRetries}):`,
+          error.response?.status,
+          error.response?.data
+        );
+
+        if (error.response?.status === 401 && retries < maxRetries - 1) {
+          // Wait a bit longer before retrying
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          retries++;
+          continue;
+        }
+
+        // Don't show error toast for auth errors to prevent user confusion
+        if (error.response?.status !== 401) {
+          toast.error("Failed to load users");
+        }
+        break;
+      }
     }
+
+    set({ isUsersLoading: false });
   },
   getMessages: async (userId) => {
     const { authUser } = useAuthStore.getState();
@@ -59,7 +83,10 @@ export const useChatStore = create((set, get) => ({
       });
     } catch (error) {
       console.error(error.response?.data?.message);
-      toast.error("Failed to load messages");
+      // Don't show error toast for auth errors to prevent user confusion
+      if (error.response?.status !== 401) {
+        toast.error("Failed to load messages");
+      }
     } finally {
       set({ isMessagesLoading: false });
     }
@@ -87,7 +114,10 @@ export const useChatStore = create((set, get) => ({
       }
     } catch (error) {
       console.error(error.response?.data?.message);
-      toast.error("Failed to send message");
+      // Don't show error toast for auth errors to prevent user confusion
+      if (error.response?.status !== 401) {
+        toast.error("Failed to send message");
+      }
     }
   },
 

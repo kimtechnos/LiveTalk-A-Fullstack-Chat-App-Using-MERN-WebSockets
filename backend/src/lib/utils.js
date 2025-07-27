@@ -13,10 +13,13 @@ export const generateToken = (userId, res) => {
     sameSite: isDevelopment ? "lax" : "none", // CSRF attacks cross-site request forgery attacks
     secure: !isDevelopment, // only send cookie over HTTPS in production
     path: "/", // Ensure cookie is available for all paths
+    domain: isDevelopment ? undefined : ".onrender.com", // Set domain for cross-subdomain cookies
   };
 
   console.log("Setting cookie with options:", cookieOptions);
+  console.log("Token being set:", token.substring(0, 20) + "...");
   res.cookie("jwt", token, cookieOptions);
+  console.log("Cookie set successfully");
 
   return token;
 };

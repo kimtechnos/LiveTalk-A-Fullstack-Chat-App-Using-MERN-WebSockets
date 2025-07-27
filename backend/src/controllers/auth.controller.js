@@ -89,6 +89,7 @@ export const logout = (req, res) => {
       sameSite: isDevelopment ? "lax" : "none",
       secure: !isDevelopment,
       path: "/", // Ensure cookie is cleared from the same path
+      domain: isDevelopment ? undefined : ".onrender.com", // Set domain for cross-subdomain cookies
     };
 
     res.clearCookie("jwt", "", clearCookieOptions);

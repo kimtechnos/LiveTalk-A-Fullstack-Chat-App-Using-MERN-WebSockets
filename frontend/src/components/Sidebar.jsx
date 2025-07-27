@@ -16,10 +16,12 @@ const Sidebar = () => {
     typingUsers,
   } = useChatStore();
 
-  const { onlineUsers } = useAuthStore();
+  const { onlineUsers, authUser } = useAuthStore();
   useEffect(() => {
-    getUsers();
-  }, [getUsers]);
+    if (authUser) {
+      getUsers();
+    }
+  }, [getUsers, authUser]);
   if (isUsersLoading) {
     return <SidebarSkeleton />;
   }
