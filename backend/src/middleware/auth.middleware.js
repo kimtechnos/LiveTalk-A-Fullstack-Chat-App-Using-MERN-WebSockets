@@ -7,6 +7,8 @@ export const protectRoute = async (req, res, next) => {
     console.log("Auth middleware - Request headers:", req.headers);
     console.log("Auth middleware - cookies:", req.cookies);
     console.log("Auth middleware - cookie header:", req.headers.cookie);
+    console.log("Auth middleware - origin:", req.headers.origin);
+    console.log("Auth middleware - referer:", req.headers.referer);
     const token = req.cookies?.jwt;
 
     if (!token) {

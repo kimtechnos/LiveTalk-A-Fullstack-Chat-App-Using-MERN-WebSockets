@@ -62,19 +62,23 @@ export const useAuthStore = create((set, get) => ({
   login: async (data) => {
     set({ isLoggingIn: true });
     try {
+      console.log("Attempting login...");
       const res = await axiosInstance.post("/auth/login", data);
+      console.log("Login response:", res.data);
+      console.log("Login response headers:", res.headers);
       set({ authUser: res.data, isLoggingIn: false });
       toast.success("Logged in successfully");
 
       // Wait a bit for the cookie to be set before connecting socket
       setTimeout(() => {
         try {
+          console.log("Connecting socket after login...");
           get().connectSocket();
         } catch (socketError) {
           console.error("Socket connection error:", socketError);
           toast.error("Failed to connect to socket");
         }
-      }, 500); // Increased delay to ensure cookie is set
+      }, 1000); // Increased delay to ensure cookie is set
     } catch (error) {
       const message =
         error.response?.data?.message || "Login failed. Please try again.";

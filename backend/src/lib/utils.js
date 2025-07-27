@@ -15,6 +15,11 @@ export const generateToken = (userId, res) => {
     path: "/", // Ensure cookie is available for all paths
   };
 
+  // In production, set domain to allow cross-domain cookies
+  if (!isDevelopment) {
+    cookieOptions.domain = "onrender.com"; // Allow cookies for onrender.com domain
+  }
+
   console.log("Setting cookie with options:", cookieOptions);
   res.cookie("jwt", token, cookieOptions);
 
