@@ -71,9 +71,18 @@ export const useAuthStore = create((set, get) => ({
       toast.success("Logged in successfully");
 
       // Wait a bit for the cookie to be set before connecting socket
-      setTimeout(() => {
+      setTimeout(async () => {
         try {
           console.log("Connecting socket after login...");
+
+          // Test if cookies are being sent
+          try {
+            const testRes = await axiosInstance.get("/test-cookies");
+            console.log("Cookie test response:", testRes.data);
+          } catch (testError) {
+            console.error("Cookie test failed:", testError.response?.data);
+          }
+
           get().connectSocket();
         } catch (socketError) {
           console.error("Socket connection error:", socketError);

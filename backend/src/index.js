@@ -21,7 +21,9 @@ app.use(express.json({ limit: "50mb" }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: true, // Allow all origins in development, will be restricted in production
+    origin:
+      process.env.CLIENT_URL ||
+      "https://livetalk-frontend-chat-app-using-mern.onrender.com",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
@@ -30,6 +32,18 @@ app.use(
 
 app.get("/", (req, res) => {
   res.send("OK");
+});
+
+// Test endpoint to check cookies
+app.get("/api/test-cookies", (req, res) => {
+  console.log("Test cookies endpoint hit");
+  console.log("Request cookies:", req.cookies);
+  console.log("Request headers:", req.headers);
+  res.json({
+    cookies: req.cookies,
+    hasJwt: !!req.cookies?.jwt,
+    headers: req.headers,
+  });
 });
 
 app.use("/api/auth", authRoutes);

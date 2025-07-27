@@ -68,6 +68,13 @@ export const login = async (req, res) => {
     console.log("Response headers after setting cookie:", res.getHeaders());
     console.log("Set-Cookie header:", res.getHeader("Set-Cookie"));
     console.log("Response status:", res.statusCode);
+    console.log("Cookie options being used:", {
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === "development" ? "lax" : "none",
+      secure: process.env.NODE_ENV !== "development",
+      path: "/",
+    });
     res.status(200).json({
       _id: user._id,
       fullName: user.fullName,
@@ -89,7 +96,7 @@ export const logout = (req, res) => {
       sameSite: isDevelopment ? "lax" : "none",
       secure: !isDevelopment,
       path: "/", // Ensure cookie is cleared from the same path
-      domain: isDevelopment ? undefined : ".onrender.com", // Set domain for cross-subdomain cookies
+      // Removed domain setting as it might be causing issues
     };
 
     res.clearCookie("jwt", "", clearCookieOptions);

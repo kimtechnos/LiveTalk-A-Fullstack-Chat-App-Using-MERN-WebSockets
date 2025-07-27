@@ -13,7 +13,7 @@ export const generateToken = (userId, res) => {
     sameSite: isDevelopment ? "lax" : "none", // CSRF attacks cross-site request forgery attacks
     secure: !isDevelopment, // only send cookie over HTTPS in production
     path: "/", // Ensure cookie is available for all paths
-    domain: isDevelopment ? undefined : ".onrender.com", // Set domain for cross-subdomain cookies
+    // Removed domain setting as it might be causing issues
   };
 
   console.log("Setting cookie with options:", cookieOptions);
