@@ -7,7 +7,10 @@ const userSocketMap = {}; // { userId: [socketId, ...] }
 export function setupSocket(server) {
   io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_URL,
+      origin: [
+        process.env.CLIENT_URL,
+        "https://livetalk-frontend-chat-app-using-mern.onrender.com",
+      ],
       methods: ["GET", "POST"],
       credentials: true,
     },

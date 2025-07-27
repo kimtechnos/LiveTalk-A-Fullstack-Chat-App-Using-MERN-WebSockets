@@ -65,6 +65,7 @@ export const login = async (req, res) => {
     console.log("Login successful for user:", user._id);
     generateToken(user._id, res);
     console.log("Token generated and cookie set");
+    console.log("Response headers after setting cookie:", res.getHeaders());
     res.status(200).json({
       _id: user._id,
       fullName: user.fullName,
@@ -87,11 +88,6 @@ export const logout = (req, res) => {
       secure: !isDevelopment,
       path: "/", // Ensure cookie is cleared from the same path
     };
-
-    // In production, set domain to allow cross-domain cookies
-    if (!isDevelopment) {
-      clearCookieOptions.domain = ".onrender.com"; // Allow cookies for all onrender.com subdomains
-    }
 
     res.clearCookie("jwt", "", clearCookieOptions);
     res.status(200).json({ success: true, message: "Logged out successfully" });
