@@ -73,7 +73,7 @@ export const useAuthStore = create((set, get) => ({
           console.error("Socket connection error:", socketError);
           toast.error("Failed to connect to socket");
         }
-      }, 100);
+      }, 500); // Increased delay to ensure cookie is set
     } catch (error) {
       const message =
         error.response?.data?.message || "Login failed. Please try again.";

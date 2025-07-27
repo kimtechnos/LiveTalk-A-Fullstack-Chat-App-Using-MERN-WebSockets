@@ -80,13 +80,20 @@ export const logout = (req, res) => {
   try {
     const isDevelopment = process.env.NODE_ENV === "development";
 
-    res.clearCookie("jwt", "", {
+    const clearCookieOptions = {
       maxAge: 0,
       httpOnly: true,
       sameSite: isDevelopment ? "lax" : "none",
       secure: !isDevelopment,
       path: "/", // Ensure cookie is cleared from the same path
-    });
+    };
+
+    // In production, set domain to allow cross-domain cookies
+    if (!isDevelopment) {
+      clearCookieOptions.domain = ".onrender.com"; // Allow cookies for all onrender.com subdomains
+    }
+
+    res.clearCookie("jwt", "", clearCookieOptions);
     res.status(200).json({ success: true, message: "Logged out successfully" });
   } catch (error) {
     console.log("Error in logout controller", error.message);
