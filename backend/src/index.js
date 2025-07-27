@@ -27,14 +27,14 @@ app.use(
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
-  })
+  }),
 );
 
 app.get("/", (req, res) => {
   res.send("OK");
 });
 
-// Test endpoint to check cookies
+// Test endpoint to check cookies (keeping for debugging)
 app.get("/api/test-cookies", (req, res) => {
   console.log("Test cookies endpoint hit");
   console.log("Request cookies:", req.cookies);

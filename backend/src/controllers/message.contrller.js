@@ -93,11 +93,11 @@ export const getUndeliveredMessages = async (req, res) => {
       "Found",
       messages.length,
       "undelivered messages for user:",
-      myId
+      myId,
     );
     console.log(
       "Undelivered messages:",
-      messages.map((m) => ({ id: m._id, senderId: m.senderId, text: m.text }))
+      messages.map((m) => ({ id: m._id, senderId: m.senderId, text: m.text })),
     );
     res.status(200).json(messages);
   } catch (error) {

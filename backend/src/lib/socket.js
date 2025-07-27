@@ -37,7 +37,7 @@ export function setupSocket(server) {
       Message.find({ receiverId: userId, status: "sent" })
         .then((messages) => {
           console.log(
-            `Found ${messages.length} undelivered messages for user ${userId}`
+            `Found ${messages.length} undelivered messages for user ${userId}`,
           );
           messages.forEach((message) => {
             emitToUser(message.senderId, "messageStatusUpdated", {
@@ -56,7 +56,7 @@ export function setupSocket(server) {
       console.log("Client disconnected: ", socket.id);
       if (userId && userSocketMap[userId]) {
         userSocketMap[userId] = userSocketMap[userId].filter(
-          (id) => id !== socket.id
+          (id) => id !== socket.id,
         );
         if (userSocketMap[userId].length === 0) delete userSocketMap[userId];
       }

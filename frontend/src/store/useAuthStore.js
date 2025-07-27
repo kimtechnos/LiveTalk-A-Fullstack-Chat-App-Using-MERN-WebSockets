@@ -20,6 +20,15 @@ export const useAuthStore = create((set, get) => ({
     try {
       console.log("Checking authentication...");
       console.log("Current authUser state:", get().authUser);
+
+      // Check if token exists in localStorage
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.log("No token found in localStorage");
+        set({ authUser: null, isCheckingAuth: false });
+        return;
+      }
+
       const res = await axiosInstance.get("/auth/check");
       console.log("Auth check successful:", res.data);
       set({ authUser: res.data, isCheckingAuth: false });
@@ -28,9 +37,12 @@ export const useAuthStore = create((set, get) => ({
       console.error(
         "Auth check failed:",
         error.response?.status,
-        error.response?.data
+        error.response?.data,
       );
       if (error.response && error.response.status === 401) {
+        // Clear token on auth failure
+        localStorage.removeItem("token");
+        console.log("Token cleared due to auth failure");
         set({ authUser: null, isCheckingAuth: false });
         // Optionally disconnect socket if exists
         if (get().socket) {
@@ -67,28 +79,26 @@ export const useAuthStore = create((set, get) => ({
       console.log("Login response:", res.data);
       console.log("Login response headers:", res.headers);
       console.log("Login response status:", res.status);
+
+      // Store token in localStorage
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+        console.log("Token stored in localStorage");
+      }
+
       set({ authUser: res.data, isLoggingIn: false });
       toast.success("Logged in successfully");
 
-      // Wait a bit for the cookie to be set before connecting socket
-      setTimeout(async () => {
+      // Connect socket immediately after login
+      setTimeout(() => {
         try {
           console.log("Connecting socket after login...");
-
-          // Test if cookies are being sent
-          try {
-            const testRes = await axiosInstance.get("/test-cookies");
-            console.log("Cookie test response:", testRes.data);
-          } catch (testError) {
-            console.error("Cookie test failed:", testError.response?.data);
-          }
-
           get().connectSocket();
         } catch (socketError) {
           console.error("Socket connection error:", socketError);
           toast.error("Failed to connect to socket");
         }
-      }, 2000); // Increased delay to ensure cookie is set
+      }, 1000); // Reduced delay since we're using token now
     } catch (error) {
       const message =
         error.response?.data?.message || "Login failed. Please try again.";
@@ -104,6 +114,10 @@ export const useAuthStore = create((set, get) => ({
       console.log("Logout response:", res.data);
 
       if (data?.success) {
+        // Clear token from localStorage
+        localStorage.removeItem("token");
+        console.log("Token removed from localStorage");
+
         // Disconnect socket and remove all listeners if it exists
         if (get().socket) {
           get().socket.off(); // Remove all listeners
@@ -159,7 +173,7 @@ export const useAuthStore = create((set, get) => ({
       const updatedMessages = messages.map((msg) =>
         msg._id === messageId && statusOrder[status] > statusOrder[msg.status]
           ? { ...msg, status }
-          : msg
+          : msg,
       );
       const updatedRecentMessages = Object.fromEntries(
         Object.entries(recentMessages).map(([userId, msg]) => [
@@ -167,7 +181,7 @@ export const useAuthStore = create((set, get) => ({
           msg._id === messageId && statusOrder[status] > statusOrder[msg.status]
             ? { ...msg, status }
             : msg,
-        ])
+        ]),
       );
       // ✅ FIXED: use `setChatStore()` instead of invalid `set`
       setChatStore({
@@ -200,7 +214,7 @@ export const useAuthStore = create((set, get) => ({
             "Emitting messageDelivered for message:",
             msg._id,
             "from sender:",
-            msg.senderId
+            msg.senderId,
           );
           socket.emit("messageDelivered", {
             messageId: msg._id,

@@ -3,7 +3,7 @@ packages:
   - frontend
 
 onlyBuiltDependencies:
-  - '@swc/core'
-  - '@tailwindcss/oxide'
+  - "@swc/core"
+  - "@tailwindcss/oxide"
   - bcrypt
   - esbuild

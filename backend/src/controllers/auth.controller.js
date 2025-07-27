@@ -63,7 +63,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
     console.log("Login successful for user:", user._id);
-    generateToken(user._id, res);
+    const token = generateToken(user._id, res);
     console.log("Token generated and cookie set");
     console.log("Response headers after setting cookie:", res.getHeaders());
     console.log("Set-Cookie header:", res.getHeader("Set-Cookie"));
@@ -80,6 +80,7 @@ export const login = async (req, res) => {
       fullName: user.fullName,
       email: user.email,
       profilePic: user.profilePic,
+      token, // 👈 Include token in response
     });
   } catch (error) {
     console.error("Login error:", error.message);
@@ -129,7 +130,7 @@ export const updateProfile = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { profilePic: uploadResponse.secure_url },
-      { new: true }
+      { new: true },
     );
 
     // Return sanitized response

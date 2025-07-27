@@ -39,7 +39,7 @@ export const useChatStore = create((set, get) => ({
         console.error(
           `Failed to load users (attempt ${retries + 1}/${maxRetries}):`,
           error.response?.status,
-          error.response?.data
+          error.response?.data,
         );
 
         if (error.response?.status === 401 && retries < maxRetries - 1) {
@@ -96,7 +96,7 @@ export const useChatStore = create((set, get) => ({
     try {
       const res = await axiosInstance.post(
         `/messages/send/${selectedUser._id}`,
-        messageData
+        messageData,
       );
 
       set({
@@ -185,7 +185,7 @@ export const useChatStore = create((set, get) => ({
         messages: get().messages.map((msg) =>
           msg._id === messageId && statusOrder[status] > statusOrder[msg.status]
             ? { ...msg, status }
-            : msg
+            : msg,
         ),
       });
     });

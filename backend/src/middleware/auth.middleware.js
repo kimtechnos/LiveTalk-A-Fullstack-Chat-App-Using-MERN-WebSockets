@@ -9,12 +9,27 @@ export const protectRoute = async (req, res, next) => {
     console.log("Auth middleware - cookie header:", req.headers.cookie);
     console.log(
       "Auth middleware - jwt cookie value:",
-      req.cookies?.jwt ? "Present" : "Missing"
+      req.cookies?.jwt ? "Present" : "Missing",
+    );
+    console.log(
+      "Auth middleware - authorization header:",
+      req.headers.authorization ? "Present" : "Missing",
     );
     console.log("Auth middleware - origin:", req.headers.origin);
     console.log("Auth middleware - referer:", req.headers.referer);
     console.log("Auth middleware - host:", req.headers.host);
-    const token = req.cookies?.jwt;
+
+    // Check for token in cookies first, then in Authorization header
+    let token = req.cookies?.jwt;
+
+    if (!token && req.headers.authorization) {
+      // Extract token from Authorization header (Bearer token)
+      const authHeader = req.headers.authorization;
+      if (authHeader.startsWith("Bearer ")) {
+        token = authHeader.substring(7); // Remove 'Bearer ' prefix
+        console.log("Token found in Authorization header");
+      }
+    }
 
     if (!token) {
       console.log("Auth middleware - No token found");
