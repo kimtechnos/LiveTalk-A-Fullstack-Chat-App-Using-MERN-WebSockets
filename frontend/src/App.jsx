@@ -21,23 +21,23 @@ const App = () => {
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
   const { theme } = useThemeStore();
 
-  // Removed automatic auth check to prevent immediate logout
-  // useEffect(() => {
-  //   checkAuth();
-  // }, []);
+  // Restore automatic auth check to keep user logged in after refresh
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
   // Set the theme on initial load
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
   console.log("authUser", authUser);
-  // Removed loading condition to prevent immediate logout
-  // if (isCheckingAuth && !authUser)
-  //   return (
-  //     <div className="flex items-center justify-center h-screen">
-  //       <Loader className="size-10 animate-spin" />
-  //     </div>
-  //   );
+  // Restore loading condition while checking authentication
+  if (isCheckingAuth && !authUser)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader className="size-10 animate-spin" />
+      </div>
+    );
 
   return (
     <div>
