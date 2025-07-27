@@ -66,6 +66,7 @@ export const useAuthStore = create((set, get) => ({
       const res = await axiosInstance.post("/auth/login", data);
       console.log("Login response:", res.data);
       console.log("Login response headers:", res.headers);
+      console.log("Login response status:", res.status);
       set({ authUser: res.data, isLoggingIn: false });
       toast.success("Logged in successfully");
 
@@ -78,7 +79,7 @@ export const useAuthStore = create((set, get) => ({
           console.error("Socket connection error:", socketError);
           toast.error("Failed to connect to socket");
         }
-      }, 1000); // Increased delay to ensure cookie is set
+      }, 2000); // Increased delay to ensure cookie is set
     } catch (error) {
       const message =
         error.response?.data?.message || "Login failed. Please try again.";
