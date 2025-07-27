@@ -18,10 +18,17 @@ export const useAuthStore = create((set, get) => ({
   CheckAuth: async () => {
     set({ isCheckingAuth: true });
     try {
+      console.log("Checking authentication...");
       const res = await axiosInstance.get("/auth/check");
+      console.log("Auth check successful:", res.data);
       set({ authUser: res.data, isCheckingAuth: false });
       get().connectSocket();
     } catch (error) {
+      console.error(
+        "Auth check failed:",
+        error.response?.status,
+        error.response?.data
+      );
       if (error.response && error.response.status === 401) {
         set({ authUser: null, isCheckingAuth: false });
         // Optionally disconnect socket if exists
@@ -57,12 +64,16 @@ export const useAuthStore = create((set, get) => ({
       const res = await axiosInstance.post("/auth/login", data);
       set({ authUser: res.data, isLoggingIn: false });
       toast.success("Logged in successfully");
-      try {
-        get().connectSocket();
-      } catch (socketError) {
-        console.error("Socket connection error:", socketError);
-        toast.error("Failed to connect to socket");
-      }
+
+      // Wait a bit for the cookie to be set before connecting socket
+      setTimeout(() => {
+        try {
+          get().connectSocket();
+        } catch (socketError) {
+          console.error("Socket connection error:", socketError);
+          toast.error("Failed to connect to socket");
+        }
+      }, 100);
     } catch (error) {
       const message =
         error.response?.data?.message || "Login failed. Please try again.";

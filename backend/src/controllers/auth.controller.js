@@ -51,32 +51,41 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
+    console.log("Login attempt for email:", email);
     const user = await User.findOne({ email });
     if (!user) {
+      console.log("User not found for email:", email);
       return res.status(400).json({ message: "Invalid email or password" });
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      console.log("Password mismatch for user:", user._id);
       return res.status(400).json({ message: "Invalid email or password" });
     }
+    console.log("Login successful for user:", user._id);
     generateToken(user._id, res);
+    console.log("Token generated and cookie set");
     res.status(200).json({
       _id: user._id,
       fullName: user.fullName,
       email: user.email,
       profilePic: user.profilePic,
     });
-  } catch {
+  } catch (error) {
+    console.error("Login error:", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
 export const logout = (req, res) => {
   try {
+    const isDevelopment = process.env.NODE_ENV === "development";
+
     res.clearCookie("jwt", "", {
       maxAge: 0,
       httpOnly: true,
-      sameSite: "strict",
-      secure: process.env.NODE_ENV !== "development",
+      sameSite: isDevelopment ? "lax" : "none",
+      secure: !isDevelopment,
+      path: "/", // Ensure cookie is cleared from the same path
     });
     res.status(200).json({ success: true, message: "Logged out successfully" });
   } catch (error) {
@@ -107,7 +116,7 @@ export const updateProfile = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { profilePic: uploadResponse.secure_url },
-      { new: true },
+      { new: true }
     );
 
     // Return sanitized response

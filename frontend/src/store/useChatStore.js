@@ -14,13 +14,22 @@ export const useChatStore = create((set, get) => ({
 
   getUsers: async () => {
     const { authUser } = useAuthStore.getState();
-    if (!authUser) return; // Prevent API call if not authenticated
+    if (!authUser) {
+      console.log("No auth user, skipping getUsers");
+      return; // Prevent API call if not authenticated
+    }
+    console.log("Getting users for auth user:", authUser._id);
     set({ isUsersLoading: true });
     try {
       const res = await axiosInstance.get("/messages/users");
+      console.log("Users loaded successfully:", res.data.length, "users");
       set({ users: res.data, isUsersLoading: false });
     } catch (error) {
-      console.error(error.response?.data?.message);
+      console.error(
+        "Failed to load users:",
+        error.response?.status,
+        error.response?.data
+      );
       toast.error("Failed to load users");
     } finally {
       set({ isUsersLoading: false });

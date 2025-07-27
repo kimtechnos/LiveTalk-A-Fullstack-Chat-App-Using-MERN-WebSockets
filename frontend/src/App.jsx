@@ -23,7 +23,7 @@ const App = () => {
 
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+  }, []);
   // Set the theme on initial load
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
