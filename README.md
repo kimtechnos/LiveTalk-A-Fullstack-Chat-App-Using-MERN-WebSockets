@@ -19,6 +19,16 @@
 - **Authentication:** JWT
 - **Media Storage:** Multer & Cloudinary
 
+## Deployment
+The **LiveTalk** application is fully deployed on **Render**:
+- **Backend**:
+  Hosted at [https://livetalk-backend-chat-app.onrender.com](https://livetalk-backend-chat-app.onrender.com)  
+  API Base URL: `https://livetalk-backend-chat-app.onrender.com/api`
+  - **Frontend**:  
+  Hosted on Render and configured with environment variable:  
+  ```env
+  VITE_API_BASE_URL=https://livetalk-backend-chat-app.onrender.com
+  
 ## 📦 Installation
 
 ### 1. Clone the repo
