@@ -1,0 +1,5 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://livetalk-frontend-chat-app-using-mern.onrender.com/sitemap.xml
+
