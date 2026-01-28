@@ -29,6 +29,34 @@ const LoginPage = () => {
           name="description"
           content="Log in to KimConnect LiveTalk to continue your real-time conversations, check new messages, and stay in touch with your classmates, startups, and communities."
         />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:title"
+          content="Sign In – KimConnect LiveTalk Real-Time Chat"
+        />
+        <meta
+          property="og:description"
+          content="Sign in to your KimConnect LiveTalk account to pick up your real-time chats and stay connected."
+        />
+        <meta
+          property="og:url"
+          content="https://livetalk-frontend-chat-app-using-mern.onrender.com/login"
+        />
+        <meta property="og:image" content="/avatar.png" />
+
+        {/* Twitter / X */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Sign In – KimConnect LiveTalk Real-Time Chat"
+        />
+        <meta
+          name="twitter:description"
+          content="Log in to KimConnect LiveTalk to continue your real-time conversations and check new messages."
+        />
+        <meta name="twitter:image" content="/avatar.png" />
       </Helmet>
 
       <div className="h-screen grid lg:grid-cols-2">

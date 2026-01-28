@@ -19,6 +19,34 @@ const HomePage = () => {
           name="description"
           content="Open your KimConnect LiveTalk dashboard to chat in real time, manage conversations, and stay connected with friends, classmates, startups, and communities in Africa and beyond."
         />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:title"
+          content="KimConnect LiveTalk – Real-Time Chat Dashboard"
+        />
+        <meta
+          property="og:description"
+          content="Chat in real time with classmates, startups, and communities using the KimConnect LiveTalk dashboard."
+        />
+        <meta
+          property="og:url"
+          content="https://livetalk-frontend-chat-app-using-mern.onrender.com/"
+        />
+        <meta property="og:image" content="/avatar.png" />
+
+        {/* Twitter / X */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="KimConnect LiveTalk – Real-Time Chat Dashboard"
+        />
+        <meta
+          name="twitter:description"
+          content="Open your KimConnect LiveTalk dashboard to manage your real-time conversations."
+        />
+        <meta name="twitter:image" content="/avatar.png" />
       </Helmet>
 
       <div className="h-screen bg-base-200">

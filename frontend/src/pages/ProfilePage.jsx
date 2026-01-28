@@ -31,6 +31,34 @@ const ProfilePage = () => {
           name="description"
           content="View and update your KimConnect LiveTalk profile, avatar, and account details to personalize your real-time chat experience with classmates, startups, and communities."
         />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:title"
+          content="Profile – Manage Your KimConnect LiveTalk Account"
+        />
+        <meta
+          property="og:description"
+          content="Manage your KimConnect LiveTalk profile, avatar, and account details to personalize your real-time chat experience."
+        />
+        <meta
+          property="og:url"
+          content="https://livetalk-frontend-chat-app-using-mern.onrender.com/profile"
+        />
+        <meta property="og:image" content="/avatar.png" />
+
+        {/* Twitter / X */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Profile – Manage Your KimConnect LiveTalk Account"
+        />
+        <meta
+          name="twitter:description"
+          content="View and update your KimConnect LiveTalk profile and account details for a personalized chat experience."
+        />
+        <meta name="twitter:image" content="/avatar.png" />
       </Helmet>
 
       <div className="h-screen pt-20">

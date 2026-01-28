@@ -49,6 +49,34 @@ const SignUpPage = () => {
           name="description"
           content="Join KimConnect LiveTalk for free to start real-time chats, collaborate with classmates, and build your own messaging community for students, startups, and communities in Africa and beyond."
         />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:title"
+          content="Create Your KimConnect LiveTalk Account – Free Real-Time Chat"
+        />
+        <meta
+          property="og:description"
+          content="Sign up for KimConnect LiveTalk to start real-time chats, collaborate with classmates, and build your own messaging community."
+        />
+        <meta
+          property="og:url"
+          content="https://livetalk-frontend-chat-app-using-mern.onrender.com/signup"
+        />
+        <meta property="og:image" content="/avatar.png" />
+
+        {/* Twitter / X */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Create Your KimConnect LiveTalk Account – Free Real-Time Chat"
+        />
+        <meta
+          name="twitter:description"
+          content="Join KimConnect LiveTalk for free to start real-time chats and build your messaging community."
+        />
+        <meta name="twitter:image" content="/avatar.png" />
       </Helmet>
 
       <div className="min-h-screen grid lg:grid-cols-2">

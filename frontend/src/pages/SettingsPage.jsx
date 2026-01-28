@@ -24,6 +24,34 @@ const SettingsPage = () => {
           name="description"
           content="Customize your KimConnect LiveTalk chat interface with themes and appearance settings to create the perfect real-time messaging experience for your study groups, startups, and communities."
         />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:title"
+          content="Chat Appearance Settings – KimConnect LiveTalk Themes"
+        />
+        <meta
+          property="og:description"
+          content="Adjust themes and appearance settings in KimConnect LiveTalk to create your perfect real-time chat experience."
+        />
+        <meta
+          property="og:url"
+          content="https://livetalk-frontend-chat-app-using-mern.onrender.com/settings"
+        />
+        <meta property="og:image" content="/avatar.png" />
+
+        {/* Twitter / X */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Chat Appearance Settings – KimConnect LiveTalk Themes"
+        />
+        <meta
+          name="twitter:description"
+          content="Customize your KimConnect LiveTalk chat interface with themes and appearance settings."
+        />
+        <meta name="twitter:image" content="/avatar.png" />
       </Helmet>
 
       <div className="h-screen container mx-auto px-4 pt-20 max-w-5xl">
