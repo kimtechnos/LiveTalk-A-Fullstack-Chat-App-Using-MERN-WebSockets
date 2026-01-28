@@ -24,7 +24,7 @@ dist-ssr
 *.sw?
 # Node modules
 node_modules/
-
+EXPRESS_5_FIX_NOTES.md
 # Environment variables
 .env
 
