@@ -1,9 +1,10 @@
 import axios from "axios";
 
 const BASE_URL =
-  import.meta.env.VITE_API_BASE_URL === "development"
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.MODE === "development"
     ? "http://localhost:5001"
-    : import.meta.env.VITE_API_BASE_URL;
+    : "https://livetalk-backend.onrender.com");
 
 console.log("Environment:", import.meta.env.MODE);
 console.log("VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
