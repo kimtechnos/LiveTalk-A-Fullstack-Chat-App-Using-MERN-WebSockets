@@ -201,13 +201,13 @@ const SignUpPage = () => {
               </p>
             </div>
           </div>
-
-          {/* right side */}
-          <AuthImagePattern
-            title="Join our community"
-            subtitle="Connect with friends, share moments, and stay in touch with your loved ones."
-          />
         </div>
+
+        {/* right side */}
+        <AuthImagePattern
+          title="Join our community"
+          subtitle="Connect with friends, share moments, and stay in touch with your loved ones."
+        />
       </div>
     </React.Fragment>
   );
